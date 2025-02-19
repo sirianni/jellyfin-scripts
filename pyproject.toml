@@ -1,0 +1,12 @@
+[project]
+name = "jellyfin-scripts"
+version = "0.1.0"
+description = "Scripts for video post-processing in Jellyfin"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.6",
+]
