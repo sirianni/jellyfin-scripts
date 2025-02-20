@@ -72,7 +72,6 @@ class Recording:
                     "-map_metadata", "1",
                     "-c:v", "libx264", "-preset", "medium", "-crf", "25",
                     "-acodec", "aac", "-ar", "44100", "-b:a", "256k",
-                    "-t", "00:01:00",
                     "-y",  # Overwrite output files without asking
                     self.transcoded_file,
                 ],
