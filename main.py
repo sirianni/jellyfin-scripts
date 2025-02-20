@@ -33,7 +33,6 @@ class Recording:
         return os.path.join(self.dir, self.filename)
 
     def comskip(self):
-        global out_dir
         try:
             logger.info("Running comskip...")
 
@@ -41,7 +40,7 @@ class Recording:
                 [
                     COMSKIP,
                     "--ini=./comskip.ini",
-                    f"--output={out_dir}",
+                    f"--output={self.dir}",
                     self.abs_path(),
                 ],
                 check=True,
@@ -50,7 +49,7 @@ class Recording:
             )
             logger.debug(f"comskip output:\n{result.stdout}")
 
-            self.chapter_ffmeta = os.path.join(out_dir, f"{self.basename}.ffmeta")
+            self.chapter_ffmeta = os.path.join(self.dir, f"{self.basename}.ffmeta")
 
         except subprocess.CalledProcessError as e:
             logger.error(f"'{e.cmd}' returned non-zero exit status {e.returncode}.")
@@ -60,7 +59,7 @@ class Recording:
 
     def transcode(self):
         input_file = self.abs_path()
-        self.transcoded_file = os.path.join(out_dir, f"{self.basename}.mp4")
+        self.transcoded_file = os.path.join(self.dir, f"{self.basename}.mp4")
 
         try:
             logger.info("Running ffmpeg...")
@@ -102,7 +101,6 @@ if len(sys.argv) == 1:
     )
 
 recording = Recording.from_path(sys.argv[1])
-out_dir = "/tmp/out"
 
 logger.info(f"Processing recording: {recording}")
 recording.comskip()
