@@ -15,3 +15,7 @@ ffmpeg \
   -map_metadata 1 \
   -codec copy scratch/out.mp4
 ```
+
+```
+sudo systemctl link ./jellyfin-post-process.*
+```
