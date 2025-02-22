@@ -1,0 +1,10 @@
+[Unit]
+Description=Post-process Jellyfin TV recordings
+
+[Service]
+User=jellyfin
+Group=jellyfin
+WorkingDirectory=/var/lib/jellyfin
+ExecStart=/var/lib/jellyfin/scripts/jellyfin-scripts/.venv/python \
+  ./scripts/jellyfin-scripts/main.py \
+  /var/lib/jellyfin/data/livetv/recordings
