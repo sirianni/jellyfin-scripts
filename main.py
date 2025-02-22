@@ -32,8 +32,7 @@ class Recording:
 
     def delete_orig(self):
         logger.info(f"Deleting original file: {self.abs_path()}")
-        os.rename(self.abs_path(), os.path.join("/tmp", self.filename))
-        # os.remove(self.abs_path())
+        os.remove(self.abs_path())
 
     def comskip(self):
         try:
@@ -73,7 +72,7 @@ class Recording:
                     "-i", input_file,
                     "-i", self.chapter_ffmeta,
                     "-map_metadata", "1",
-                    "-c:v", "libx264", "-preset", "medium", "-crf", "25",
+                    "-c:v", "libx264", "-preset", "medium", "-crf", "26",
                     "-acodec", "aac", "-ar", "44100", "-b:a", "256k",
                     "-y",  # Overwrite output files without asking
                     "-stats_period", "15",
