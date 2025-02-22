@@ -10,7 +10,7 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 
-COMSKIP = "comskip"
+COMSKIP = "./comskip"
 
 
 class Recording:
