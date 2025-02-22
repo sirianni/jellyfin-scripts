@@ -2,6 +2,7 @@ import logging
 import os
 import subprocess
 import sys
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +19,6 @@ class Recording:
         self.filename = filename
         self.dir = dir
 
-    def __repr__(self):
-        return f"<Recording basename={self.basename} filename={self.filename} dir={self.dir}>"
-
     @staticmethod
     def from_path(path):
         return Recording(
@@ -31,6 +29,11 @@ class Recording:
 
     def abs_path(self):
         return os.path.join(self.dir, self.filename)
+
+    def delete_orig(self):
+        logger.info(f"Deleting original file: {self.abs_path()}")
+        os.rename(self.abs_path(), os.path.join("/tmp", self.filename))
+        # os.remove(self.abs_path())
 
     def comskip(self):
         try:
@@ -95,13 +98,30 @@ class Recording:
             raise e
 
 
+def walk_directory(dir):
+    logger.info(f"Walking directory: {dir}")
+
+    current_time = time.time()
+    mtime_cutoff = current_time - 600
+
+    for dirpath, _, files in os.walk(dir):
+        for file in files:
+            if file.endswith(".ts"):
+                file_path = os.path.join(dirpath, file)
+                if os.path.getmtime(file_path) < mtime_cutoff:
+                    recording = Recording.from_path(file_path)
+                    logger.info(f"Processing recording: {recording.basename}")
+                    recording.comskip()
+                    recording.transcode()
+                    recording.delete_orig()
+                else:
+                    logger.info(f"Skipping recently modified file: {file_path}")
+
+
 if len(sys.argv) == 1:
     raise ValueError(
         f"Expected 2 arguments, got {len(sys.argv)}.\nArgs recieved: {str(sys.argv)}"
     )
 
-recording = Recording.from_path(sys.argv[1])
-
-logger.info(f"Processing recording: {recording}")
-recording.comskip()
-recording.transcode()
+dir = sys.argv[1]
+walk_directory(dir)
