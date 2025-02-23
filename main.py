@@ -74,7 +74,7 @@ class Recording:
                     "-map_metadata", "1",
                     "-filter:v", "yadif", # deinterlace
                     "-codec:v", "libx264", "-preset", "medium", "-crf", "24",
-                    "-codec:a", "aac", "-ar", "44100", "-b:a", "256k",
+                    "-codec:a", "copy"
                     "-y",  # Overwrite output files without asking
                     "-stats_period", "15",
                     self.transcoded_file,
