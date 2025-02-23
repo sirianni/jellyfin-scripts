@@ -73,8 +73,8 @@ class Recording:
                     "-i", self.chapter_ffmeta,
                     "-map_metadata", "1",
                     "-filter:v", "yadif", # deinterlace
-                    "-c:v", "libx264", "-preset", "medium", "-crf", "25",
-                    "-acodec", "aac", "-ar", "44100", "-b:a", "256k",
+                    "-codec:v", "libx264", "-preset", "medium", "-crf", "24",
+                    "-codec:a", "aac", "-ar", "44100", "-b:a", "256k",
                     "-y",  # Overwrite output files without asking
                     "-stats_period", "15",
                     self.transcoded_file,
