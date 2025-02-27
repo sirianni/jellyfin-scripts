@@ -63,39 +63,36 @@ class Recording:
         input_file = self.abs_path()
         self.transcoded_file = os.path.join(self.dir, f"{self.basename}.mp4")
 
-        try:
-            logger.info("Running ffmpeg...")
+        logger.info("Running ffmpeg...")
 
-            process = subprocess.Popen(
-                [
-                    "ffmpeg",
-                    "-i", input_file,
-                    "-i", self.chapter_ffmeta,
-                    "-map_metadata", "1",
-                    "-filter:v", "yadif", # deinterlace
-                    "-codec:v", "libx264", "-preset", "medium", "-crf", "24",
-                    "-codec:a", "copy",
-                    "-y",  # Overwrite output files without asking
-                    "-stats_period", "15",
-                    self.transcoded_file,
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-            )  # fmt: skip
+        process = subprocess.Popen(
+            [
+                "ffmpeg",
+                "-i", input_file,
+                "-i", self.chapter_ffmeta,
+                "-map_metadata", "1",
+                "-filter:v", "yadif", # deinterlace
+                "-codec:v", "libx264", "-preset", "medium", "-crf", "24",
+                "-codec:a", "copy",
+                "-y",  # Overwrite output files without asking
+                "-stats_period", "15",
+                self.transcoded_file,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )  # fmt: skip
 
-            for line in iter(process.stdout.readline, ""):
-                logger.debug(line.strip())
+        for line in iter(process.stdout.readline, ""):
+            logger.debug(line.strip())
 
-            process.stdout.close()
-            process.wait()
+        process.stdout.close()
+        process.wait()
 
-            logger.info(f"Transcoding completed: {self.transcoded_file}")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"'{e.cmd}' returned non-zero exit status {e.returncode}.")
-            logger.error(f"stdout: {e.stdout}")
-            logger.error(f"stderr: {e.stderr}")
-            raise e
+        if process.returncode > 0:
+            raise subprocess.CalledProcessError(process.returncode, process.args)
+
+        logger.info(f"Transcoding completed: {self.transcoded_file}")
 
 
 def walk_directory(dir):
