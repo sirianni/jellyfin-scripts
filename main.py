@@ -61,7 +61,7 @@ class Recording:
 
     def transcode(self):
         input_file = self.abs_path()
-        self.transcoded_file = os.path.join(self.dir, f"{self.basename}.mp4")
+        self.transcoded_file = os.path.join(self.dir, f"{self.basename}.mkv")
 
         logger.info("Running ffmpeg...")
 
@@ -72,7 +72,7 @@ class Recording:
                 "-i", self.chapter_ffmeta,
                 "-map_metadata", "1",
                 "-filter:v", "yadif", # deinterlace
-                "-codec:v", "libx264", "-preset", "medium", "-crf", "24",
+                "-codec:v", "libx264", "-preset", "medium", "-crf", "23",
                 "-codec:a", "copy",
                 "-y",  # Overwrite output files without asking
                 "-stats_period", "15",
