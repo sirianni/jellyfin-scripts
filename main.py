@@ -95,6 +95,26 @@ class Recording:
         logger.info(f"Transcoding completed: {self.transcoded_file}")
 
 
+def process_file(file_path):
+    skip_file = file_path + ".skip"
+    if os.path.exists(skip_file):
+        logger.info(f"Skipping file due to existing .skip file: {file_path}")
+        return
+
+    recording = Recording.from_path(file_path)
+    logger.info(f"Processing recording: {recording.basename}")
+
+    try:
+        recording.comskip()
+        recording.transcode()
+        recording.delete_orig()
+    except Exception as e:
+        logger.error(f"Error processing {recording.basename}: {e}")
+        with open(skip_file, "w") as f:
+            f.write(f"Permanent failure: {e}\nTimestamp: {time.time()}\n")
+        logger.info(f"Created skip file: {skip_file}")
+
+
 def walk_directory(dir):
     logger.info(f"Walking directory: {dir}")
 
@@ -106,11 +126,7 @@ def walk_directory(dir):
             if file.endswith(".ts"):
                 file_path = os.path.join(dirpath, file)
                 if os.path.getmtime(file_path) < mtime_cutoff:
-                    recording = Recording.from_path(file_path)
-                    logger.info(f"Processing recording: {recording.basename}")
-                    recording.comskip()
-                    recording.transcode()
-                    recording.delete_orig()
+                    process_file(file_path)
                 else:
                     logger.info(f"Skipping recently modified file: {file_path}")
 
