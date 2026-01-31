@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import time
+from traceback import TracebackException
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,20 @@ class Recording:
     def delete_orig(self):
         logger.info(f"Deleting original file: {self.abs_path()}")
         os.remove(self.abs_path())
+
+    @property
+    def skip_file_path(self):
+        return os.path.join(self.dir, f"{self.basename}.skip")
+
+    def is_skipped(self):
+        return os.path.exists(self.skip_file_path)
+
+    def create_skip_file(self, exception):
+        skip_file = self.skip_file_path
+        with open(skip_file, "w") as f:
+            tb_exception = TracebackException.from_exception(exception)
+            f.write("".join(tb_exception.format()))
+        logger.info(f"Created skip file: {skip_file}")
 
     def comskip(self):
         try:
@@ -96,12 +111,14 @@ class Recording:
 
 
 def process_file(file_path):
-    skip_file = file_path + ".skip"
-    if os.path.exists(skip_file):
-        logger.info(f"Skipping file due to existing .skip file: {file_path}")
+    recording = Recording.from_path(file_path)
+
+    if recording.is_skipped():
+        logger.info(
+            f"Skipping file due to existing .skip file: {recording.skip_file_path}"
+        )
         return
 
-    recording = Recording.from_path(file_path)
     logger.info(f"Processing recording: {recording.basename}")
 
     try:
@@ -110,9 +127,8 @@ def process_file(file_path):
         recording.delete_orig()
     except Exception as e:
         logger.error(f"Error processing {recording.basename}: {e}")
-        with open(skip_file, "w") as f:
-            f.write(f"Permanent failure: {e}\nTimestamp: {time.time()}\n")
-        logger.info(f"Created skip file: {skip_file}")
+        recording.create_skip_file(e)
+        raise
 
 
 def walk_directory(dir):
